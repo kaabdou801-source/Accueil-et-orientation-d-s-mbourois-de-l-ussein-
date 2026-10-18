@@ -135,20 +135,22 @@ $("f").addEventListener("input",()=>{
   s.classList.remove("hidden");
 });
 
-const SCRIPT_URL="COLLE_ICI_L_URL_APPS_SCRIPT";
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbz1cId_sakln1Er6csxPFONxmppg7zMPH4ME8dTxUN2hgh7itmZ16TQtSGyV4KHo9Vbgw/exec";
 $("go").onclick=async()=>{
   const nom=$("n").value.trim(),tel=$("t").value.trim(),email=$("e").value.trim();
   const st=$("st");const r=document.querySelector('input[name="c"]:checked');const choix=r?r.value:"";
   if(!sel||!nom||!tel||!choix||!/^\S+@\S+\.\S+$/.test(email)){st.innerHTML='<div class="warn">Remplis ton nom, ton téléphone, une adresse e-mail valide et ton choix.</div>';return}
   $("go").disabled=true;
   try{
-    await fetch(SCRIPT_URL,{method:"POST",mode:"no-cors",body:JSON.stringify({nom,tel,email,filiere:sel.n,campus:sel.c,choix})});
+    const rep=await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({nom,tel,email,filiere:sel.n,campus:sel.c,choix})});
+    const txt=await rep.text();
+    if(txt.trim()!=="ok")throw new Error("echec");
     st.innerHTML='<div class="ok"></div>';
     st.firstChild.textContent="✅ Inscription enregistrée. Un e-mail de bienvenue a été envoyé à "+email+" (pense à vérifier tes spams).";
   }catch(e){
     $("go").disabled=false;
     const msg="Nouveau bachelier AERCM : "+nom+" – "+tel+" – "+email+" – "+sel.n+" – Campus de "+sel.c+" – "+choix;
-    st.innerHTML='<div class="warn">Un problème est survenu. Envoie ton inscription dans le groupe WhatsApp :</div>';
+    st.innerHTML='<div class="warn">Ton inscription n’a pas pu être confirmée. Envoie-la dans le groupe WhatsApp :</div>';
     const a=document.createElement("a");a.className="btn";a.target="_blank";a.rel="noopener";
     a.href="https://wa.me/?text="+encodeURIComponent(msg);a.textContent="Envoyer sur WhatsApp";st.appendChild(a);
   }
